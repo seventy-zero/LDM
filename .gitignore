@@ -1,0 +1,48 @@
+# Build artifacts and executables
+dist/
+build/
+*.exe
+*.spec
+
+# Python cache and temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Test files (optional - remove if you want to include them)
+test_*.py
+
+# PyInstaller cache
+*.manifest
+*.spec
+
+# Windows specific
+*.lnk
