@@ -7,6 +7,7 @@ import customtkinter as ctk
 from scapy.all import *
 import tkinter as tk
 from tkinter import messagebox
+import pyperclip
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
@@ -316,6 +317,18 @@ class NetworkDiscoveryTool(ctk.CTk):
         )
         self.system_desc_field.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
         
+        copy_button = ctk.CTkButton(
+            parent_frame,
+            text="Copy",
+            command=self.copy_device_info,
+            font=ctk.CTkFont(size=11),
+            height=25,
+            width=80,
+            fg_color="gray",
+            hover_color="darkgray"
+        )
+        copy_button.grid(row=5, column=1, padx=10, pady=(10, 5), sticky="e")
+        
     def update_device_info_display(self):
         def update():
             self.device_name_field.configure(text=self.current_device['device_name'])
@@ -325,6 +338,19 @@ class NetworkDiscoveryTool(ctk.CTk):
             self.system_desc_field.configure(text=self.current_device['system_description'])
             
         self.after(0, update)
+        
+    def copy_device_info(self):
+        try:
+            info_text = f"Device Name: {self.current_device['device_name']}\n"
+            info_text += f"Switch Name: {self.current_device['switch_name']}\n"
+            info_text += f"Port ID: {self.current_device['port_id']}\n"
+            info_text += f"Port Description: {self.current_device['port_description']}\n"
+            info_text += f"System Description: {self.current_device['system_description']}"
+            
+            pyperclip.copy(info_text)
+            self.update_status("Device info copied to clipboard", "green")
+        except Exception as e:
+            self.update_status(f"Failed to copy: {str(e)}", "red")
         
     def toggle_blink(self):
         if self.is_blinking:
