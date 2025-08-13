@@ -3,20 +3,14 @@
 
 ## What This Does
 
-When you plug your computer into a network port, switches automatically send out discovery packets (LLDP or CDP) that tell you:
-- **Switch Name** - What switch you're connected to
-- **Port ID** - Which specific port (like "GigabitEthernet1/0/24")
-- **Port Description** - Human readable description (like "Conference Room A")
-- **System Description** - Switch model and info
-
-This tool sniffs those packets and shows you the info in a clean GUI. No more guessing which port is which!
+When you plug your computer into a network port, switches automatically send out discovery packets (LLDP or CDP)
 
 ## Quick Start
 
 ### Option 1: Just Run It (Easiest)
 1. Download the `LDM.exe` from the releases
-2. Right-click → "Run as administrator"
-3. Plug in your network cable
+2. 3. Plug in your network cable
+3. Right-click → "Run as administrator"
 4. Click "Start Discovery"
 
 ### Option 2: Build It Yourself
@@ -107,4 +101,3 @@ Use it however you want. It's just a network tool for figuring out which port yo
 
 ---
 
-**Pro tip**: The blinking feature is super useful for finding the actual physical port on the switch. Start blinking, then go look for the flashing LED! 
