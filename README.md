@@ -9,7 +9,7 @@ When you plug your computer into a network port, switches automatically send out
 
 ### Option 1: Just Run It (Easiest)
 1. Download the `LDM.exe` from the releases
-2. 3. Plug in your network cable
+2. Plug in your network cable
 3. Right-click → "Run as administrator"
 4. Click "Start Discovery"
 
