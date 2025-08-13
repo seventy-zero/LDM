@@ -3,7 +3,7 @@
 
 ## What This Does
 
-When you plug your computer into a network port, switches automatically send out discovery packets (LLDP or CDP)
+When you plug your computer into a network port, switches automatically send out discovery packets (LLDP or CDP). This interprets and displays them.
 
 ## Quick Start
 
