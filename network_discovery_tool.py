@@ -8,6 +8,7 @@ from scapy.all import *
 import tkinter as tk
 from tkinter import messagebox
 import pyperclip
+import uuid
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("green")
@@ -32,6 +33,7 @@ class NetworkDiscoveryTool(ctk.CTk):
         
         self.current_device = {
             'device_name': socket.gethostname(),
+            'mac_address': self.get_mac_address(),
             'switch_name': 'Unknown',
             'port_id': 'Unknown',
             'port_description': 'Unknown',
@@ -41,6 +43,29 @@ class NetworkDiscoveryTool(ctk.CTk):
         self.create_widgets()
         
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
+    def get_mac_address(self):
+        try:
+            import subprocess
+            result = subprocess.run(['ipconfig', '/all'], capture_output=True, text=True, encoding='cp437', creationflags=subprocess.CREATE_NO_WINDOW)
+            lines = result.stdout.split('\n')
+            
+            for line in lines:
+                if 'Physical Address' in line or 'MAC Address' in line:
+                    mac = line.split(':')[-1].strip()
+                    if len(mac) == 17 and mac.count('-') == 5:
+                        return mac.upper()
+                    elif len(mac) == 17 and mac.count(':') == 5:
+                        return mac.upper()
+            
+            return "Unknown"
+        except:
+            try:
+                mac = uuid.getnode()
+                mac_address = ':'.join(['{:02x}'.format((mac >> elements) & 0xff) for elements in range(0,2*6,2)][::-1])
+                return mac_address.upper()
+            except:
+                return "Unknown"
         
     def create_widgets(self):
         main_frame = ctk.CTkFrame(self)
@@ -249,13 +274,30 @@ class NetworkDiscoveryTool(ctk.CTk):
         )
         self.device_name_field.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
         
+        mac_address_label = ctk.CTkLabel(
+            parent_frame,
+            text="MAC Address:",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="gray"
+        )
+        mac_address_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        
+        self.mac_address_field = ctk.CTkLabel(
+            parent_frame,
+            text=self.current_device['mac_address'],
+            font=ctk.CTkFont(size=12),
+            text_color="white",
+            bg_color="transparent"
+        )
+        self.mac_address_field.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+        
         switch_name_label = ctk.CTkLabel(
             parent_frame,
             text="Switch Name:",
             font=ctk.CTkFont(size=12, weight="bold"),
             text_color="gray"
         )
-        switch_name_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        switch_name_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
         
         self.switch_name_field = ctk.CTkLabel(
             parent_frame,
@@ -264,7 +306,7 @@ class NetworkDiscoveryTool(ctk.CTk):
             text_color="white",
             bg_color="transparent"
         )
-        self.switch_name_field.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+        self.switch_name_field.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
         
         port_id_label = ctk.CTkLabel(
             parent_frame,
@@ -272,7 +314,7 @@ class NetworkDiscoveryTool(ctk.CTk):
             font=ctk.CTkFont(size=12, weight="bold"),
             text_color="gray"
         )
-        port_id_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        port_id_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
         
         self.port_id_field = ctk.CTkLabel(
             parent_frame,
@@ -281,7 +323,7 @@ class NetworkDiscoveryTool(ctk.CTk):
             text_color="white",
             bg_color="transparent"
         )
-        self.port_id_field.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+        self.port_id_field.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
         
         port_desc_label = ctk.CTkLabel(
             parent_frame,
@@ -289,7 +331,7 @@ class NetworkDiscoveryTool(ctk.CTk):
             font=ctk.CTkFont(size=12, weight="bold"),
             text_color="gray"
         )
-        port_desc_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        port_desc_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
         
         self.port_desc_field = ctk.CTkLabel(
             parent_frame,
@@ -298,7 +340,7 @@ class NetworkDiscoveryTool(ctk.CTk):
             text_color="white",
             bg_color="transparent"
         )
-        self.port_desc_field.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
+        self.port_desc_field.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
         
         system_desc_label = ctk.CTkLabel(
             parent_frame,
@@ -306,7 +348,7 @@ class NetworkDiscoveryTool(ctk.CTk):
             font=ctk.CTkFont(size=12, weight="bold"),
             text_color="gray"
         )
-        system_desc_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+        system_desc_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
         
         self.system_desc_field = ctk.CTkLabel(
             parent_frame,
@@ -315,7 +357,7 @@ class NetworkDiscoveryTool(ctk.CTk):
             text_color="white",
             bg_color="transparent"
         )
-        self.system_desc_field.grid(row=4, column=1, padx=10, pady=5, sticky="ew")
+        self.system_desc_field.grid(row=5, column=1, padx=10, pady=5, sticky="ew")
         
         copy_button = ctk.CTkButton(
             parent_frame,
@@ -332,6 +374,7 @@ class NetworkDiscoveryTool(ctk.CTk):
     def update_device_info_display(self):
         def update():
             self.device_name_field.configure(text=self.current_device['device_name'])
+            self.mac_address_field.configure(text=self.current_device['mac_address'])
             self.switch_name_field.configure(text=self.current_device['switch_name'])
             self.port_id_field.configure(text=self.current_device['port_id'])
             self.port_desc_field.configure(text=self.current_device['port_description'])
@@ -342,6 +385,7 @@ class NetworkDiscoveryTool(ctk.CTk):
     def copy_device_info(self):
         try:
             info_text = f"Device Name: {self.current_device['device_name']}\n"
+            info_text += f"MAC Address: {self.current_device['mac_address']}\n"
             info_text += f"Switch Name: {self.current_device['switch_name']}\n"
             info_text += f"Port ID: {self.current_device['port_id']}\n"
             info_text += f"Port Description: {self.current_device['port_description']}\n"
@@ -476,6 +520,7 @@ class NetworkDiscoveryTool(ctk.CTk):
         
         self.current_device = {
             'device_name': socket.gethostname(),
+            'mac_address': self.get_mac_address(),
             'switch_name': 'Unknown',
             'port_id': 'Unknown',
             'port_description': 'Unknown',
@@ -514,6 +559,7 @@ class NetworkDiscoveryTool(ctk.CTk):
         
         self.current_device = {
             'device_name': socket.gethostname(),
+            'mac_address': self.get_mac_address(),
             'switch_name': 'Unknown',
             'port_id': 'Unknown',
             'port_description': 'Unknown',
