@@ -16,8 +16,8 @@ This tool sniffs those packets and shows you the info in a clean GUI. No more gu
 ### Option 1: Just Run It (Easiest)
 1. Download the `LDM.exe` from the releases
 2. Right-click → "Run as administrator"
-3. Click "Start Discovery" and plug in your network cable
-4. Watch the magic happen
+3. Plug in your network cable
+4. Click "Start Discovery"
 
 ### Option 2: Build It Yourself
 ```bash
