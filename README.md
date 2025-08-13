@@ -1,6 +1,5 @@
 # LDM - Link Discovery Manager
 
-Ever wanted to know what switch port you're plugged into? This tool does exactly that - it's basically a software version of a NetAlly LinkRunner AT, but free and runs on Windows.
 
 ## What This Does
 
