@@ -66,6 +66,46 @@ class NetworkDiscoveryTool(ctk.CTk):
                 return mac_address.upper()
             except:
                 return "Unknown"
+    
+    def get_active_interface(self):
+        """Get the active network interface for packet capture"""
+        try:
+            from scapy.all import get_if_list, get_if_addr
+            import subprocess
+            
+            # Get the default route interface
+            result = subprocess.run(['route', 'print', '0.0.0.0'], capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            lines = result.stdout.split('\n')
+            
+            # Find the interface with the default route
+            for line in lines:
+                if '0.0.0.0' in line and '0.0.0.0' in line:
+                    parts = line.split()
+                    if len(parts) >= 4:
+                        interface_ip = parts[3]
+                        if interface_ip != '0.0.0.0':
+                            # Find the Scapy interface that matches this IP
+                            for iface in get_if_list():
+                                try:
+                                    if_addr = get_if_addr(iface)
+                                    if if_addr == interface_ip:
+                                        return iface
+                                except:
+                                    continue
+            
+            # Fallback: find the first interface with an IP address
+            for iface in get_if_list():
+                try:
+                    if_addr = get_if_addr(iface)
+                    if if_addr and if_addr != '127.0.0.1':
+                        return iface
+                except:
+                    continue
+                    
+            return None
+        except Exception as e:
+            self.update_status(f"Error detecting interface: {str(e)}", "red")
+            return None
         
     def create_widgets(self):
         main_frame = ctk.CTkFrame(self)
@@ -466,10 +506,13 @@ class NetworkDiscoveryTool(ctk.CTk):
         blink_type = self.blink_type_var.get()
         
         try:
+            # Get the active interface for blinking
+            active_interface = self.get_active_interface()
+            
             while self.is_blinking:
                 if blink_type == "lldp":
                     lldp_packet = (
-                        Ether(dst="01:80:c2:00:00:0e", src=get_if_hwaddr(conf.iface)) /
+                        Ether(dst="01:80:c2:00:00:0e", src=get_if_hwaddr(active_interface if active_interface else conf.iface)) /
                         Raw(load=b'\x02\x07\x04\x00\x11\x22\x33\x44\x55\x66\x77' +
                                    b'\x04\x07\x04\x00\x11\x22\x33\x44\x55\x66\x77' +
                                    b'\x06\x02\x00\x78' +
@@ -479,11 +522,11 @@ class NetworkDiscoveryTool(ctk.CTk):
                                    b'\x00\x00')
                     )
                     
-                    sendp(lldp_packet, verbose=False)
+                    sendp(lldp_packet, iface=active_interface, verbose=False)
                     
                 elif blink_type == "cdp":
                     cdp_packet = (
-                        Ether(dst="01:00:0c:cc:cc:cc", src=get_if_hwaddr(conf.iface)) /
+                        Ether(dst="01:00:0c:cc:cc:cc", src=get_if_hwaddr(active_interface if active_interface else conf.iface)) /
                         LLC(dsap=0xaa, ssap=0xaa, ctrl=3) /
                         SNAP(OUI=0x00000c, code=0x2000) /
                         Raw(load=b'\x02\x00\x00\xb4' +
@@ -495,7 +538,7 @@ class NetworkDiscoveryTool(ctk.CTk):
                                    b'\x00\x06\x00\x0e' + b'Link Discovery Manager')
                     )
                     
-                    sendp(cdp_packet, verbose=False)
+                    sendp(cdp_packet, iface=active_interface, verbose=False)
                 
                 time.sleep(1.0)
                 
@@ -580,12 +623,25 @@ class NetworkDiscoveryTool(ctk.CTk):
                 
             packet_filter = " or ".join(filters)
             
-            sniff(
-                prn=self.process_packet,
-                store=0,
-                filter=packet_filter,
-                stop_filter=lambda p: not self.is_sniffing
-            )
+            # Get the active network interface
+            active_interface = self.get_active_interface()
+            if active_interface:
+                self.update_status(f"Using interface: {active_interface}", "green")
+                sniff(
+                    prn=self.process_packet,
+                    store=0,
+                    filter=packet_filter,
+                    iface=active_interface,
+                    stop_filter=lambda p: not self.is_sniffing
+                )
+            else:
+                # Fallback to default interface
+                sniff(
+                    prn=self.process_packet,
+                    store=0,
+                    filter=packet_filter,
+                    stop_filter=lambda p: not self.is_sniffing
+                )
             
         except Exception as e:
             self.update_status(f"Error during discovery: {str(e)}", "red")
